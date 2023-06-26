@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?><module codename="io.github.chris2011.netbeans.plugins.breadcrumbexplorer.breadcrumb.explorer">
+    <module_version install_time="1687810829495" last="true" origin="installer" specification_version="1.0.0">
+        <file crc="1085935049" name="config/Modules/io-github-chris2011-netbeans-plugins-breadcrumbexplorer-breadcrumb-explorer.xml"/>
+        <file crc="1351143162" name="modules/io-github-chris2011-netbeans-plugins-breadcrumbexplorer-breadcrumb-explorer.jar"/>
+    </module_version>
+</module>

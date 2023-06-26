@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Layer: io/github/chris2011/netbeans/plugins/breadcrumbexplorer/layer.xml
+OpenIDE-Module-Localizing-Bundle: io/github/chris2011/netbeans/plugins/breadcrumbexplorer/Bundle.properties
+OpenIDE-Module-Requires: org.openide.windows.WindowManager
+

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="Actions">
+        <folder name="File">
+            <file name="io-github-chris2011-netbeans-plugins-breadcrumbexplorer-breadcrumbexplorer-ShowBreadcrumbExplorer.instance">
+                <!--io.github.chris2011.netbeans.plugins.breadcrumbexplorer.ShowBreadcrumbExplorer-->
+                <attr bundlevalue="io.github.chris2011.netbeans.plugins.breadcrumbexplorer.Bundle#CTL_ShowBreadcrumbExplorer" name="displayName"/>
+                <attr methodvalue="org.openide.awt.Actions.alwaysEnabled" name="instanceCreate"/>
+                <attr name="delegate" newvalue="io.github.chris2011.netbeans.plugins.breadcrumbexplorer.ShowBreadcrumbExplorer"/>
+                <attr boolvalue="false" name="noIconInMenu"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Toolbars">
+        <folder name="Breadcrumb Explorer">
+            <file name="io-github-chris2011-netbeans-plugins-breadcrumbexplorer-breadcrumbexplorer-ShowBreadcrumbExplorer.shadow">
+                <!--io.github.chris2011.netbeans.plugins.breadcrumbexplorer.ShowBreadcrumbExplorer-->
+                <attr name="originalFile" stringvalue="Actions/File/io-github-chris2011-netbeans-plugins-breadcrumbexplorer-breadcrumbexplorer-ShowBreadcrumbExplorer.instance"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Shortcuts">
+        <file name="DOS-L.shadow">
+            <!--io.github.chris2011.netbeans.plugins.breadcrumbexplorer.ShowBreadcrumbExplorer-->
+            <attr name="originalFile" stringvalue="Actions/File/io-github-chris2011-netbeans-plugins-breadcrumbexplorer-breadcrumbexplorer-ShowBreadcrumbExplorer.instance"/>
+        </file>
+    </folder>
+    <folder name="Menu">
+        <folder name="View">
+            <file name="BreadcrumbExplorer.lblShowPathBreadcrumbs.shadow">
+                <!--io.github.chris2011.netbeans.plugins.breadcrumbexplorer.MenuAction-->
+                <attr name="originalFile" stringvalue="Editors/Actions/BreadcrumbExplorer.lblShowPathBreadcrumbs.instance"/>
+                <attr intvalue="950" name="position"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Editors">
+        <folder name="Actions">
+            <file name="BreadcrumbExplorer.lblShowPathBreadcrumbs.instance">
+                <!--io.github.chris2011.netbeans.plugins.breadcrumbexplorer.MenuAction-->
+                <attr bundlevalue="io.github.chris2011.netbeans.plugins.breadcrumbexplorer.Bundle#BreadcrumbExplorer.lblShowPathBreadcrumbs" name="displayName"/>
+                <attr bundlevalue="io.github.chris2011.netbeans.plugins.breadcrumbexplorer.Bundle#BreadcrumbExplorer.lblShowPathBreadcrumbs" name="ShortDescription"/>
+                <attr bundlevalue="io.github.chris2011.netbeans.plugins.breadcrumbexplorer.Bundle#BreadcrumbExplorer.lblShowPathBreadcrumbs" name="menuText"/>
+                <attr bundlevalue="io.github.chris2011.netbeans.plugins.breadcrumbexplorer.Bundle#BreadcrumbExplorer.lblShowPathBreadcrumbs" name="popupText"/>
+                <attr name="preferencesKey" stringvalue="enable.breadcrumb_explorer"/>
+                <attr methodvalue="org.netbeans.modules.editor.lib2.actions.EditorActionUtilities.getGlobalPreferences" name="preferencesNode"/>
+                <attr boolvalue="true" name="preferencesDefault"/>
+                <attr name="Name" stringvalue="BreadcrumbExplorer.lblShowPathBreadcrumbs"/>
+                <attr name="helpID" stringvalue="BreadcrumbExplorer.lblShowPathBreadcrumbs"/>
+                <attr methodvalue="org.netbeans.modules.editor.lib2.actions.WrapperEditorAction.create" name="instanceCreate"/>
+                <attr boolvalue="true" name="WrapperActionKey"/>
+                <attr name="delegate" newvalue="io.github.chris2011.netbeans.plugins.breadcrumbexplorer.MenuAction"/>
+            </file>
+        </folder>
+    </folder>
+</filesystem>
