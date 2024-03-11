@@ -9,3 +9,7 @@ Create folder breadcrumbs for NetBeans like in VS Code and in IntelliJ
 ## Changelog
 
 See [Changelog](./Changelog.md) for all information 
+
+## Screenshot
+
+![Netbeans-Breadcrumb-Explorer](./screenshots/netbeans-breadcrumb-explorer.png)
