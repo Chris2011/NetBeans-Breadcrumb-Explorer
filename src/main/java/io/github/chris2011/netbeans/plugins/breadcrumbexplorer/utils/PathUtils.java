@@ -1,9 +1,11 @@
 package io.github.chris2011.netbeans.plugins.breadcrumbexplorer.utils;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
@@ -18,37 +20,41 @@ public class PathUtils {
     public static String getRelativeProjectPath(FileObject fileObject) {
         Project project = FileOwnerQuery.getOwner(fileObject);
 
-        if (project != null) {
-            FileObject projectDirectory = project.getProjectDirectory();
-            String projectDirectoryPath = projectDirectory.getPath();
-            String fileObjectPath = fileObject.getPath();
-
-            if (fileObjectPath.startsWith(projectDirectoryPath)) {
-                return fileObjectPath.substring(projectDirectoryPath.length() - projectDirectory.getName().length());
-            }
+        if (project == null) {
+            return fileObject.getPath();
         }
 
-        return null;
+        return fileObject.getPath().substring((project.getProjectDirectory().getParent().getPath() + File.separator).length());
     }
 
-    public static String getAbsoluteFolderPath(String name, FileObject fileObject) {
-        String escapedName = Pattern.quote(name);
-        // TODO: Problem with this path: C:\Users\Chris\Documents\NetBeansProjects\HTML5Application\public_html\folder\вфывфваывшгне_minified__[01-04-2022_23-50-44]\ья ашду.min.css
-        Pattern pattern = Pattern.compile(".*" + escapedName);
-        Matcher matcher = pattern.matcher(fileObject.getPath());
+    public static List<String> getAbsoluteFolderPath(List<String> nameList, FileObject fileObject) {
+        Project project = FileOwnerQuery.getOwner(fileObject);
+        List<String> folders = new ArrayList<>();
 
-        if (matcher.find()) {
-            return matcher.group(0);
+        if (project == null) {
+            folders.add(fileObject.getPath());
+
+            return folders;
         }
 
-        return null;
+        StringBuilder absolutePath = new StringBuilder(project.getProjectDirectory().getParent().getPath());
+
+        for (String folder : nameList) {
+            absolutePath.append(File.separator).append(folder);
+            folders.add(absolutePath.toString());
+        }
+
+        return folders;
     }
 
-    public static String[] splitPath(String pathString) {
+    public static List<String> splitPath(String pathString) {
+        if (pathString == null) {
+            return Arrays.asList("".split(""));
+        }
+
         Path path = Paths.get(pathString);
-
         String separator = Utilities.isWindows() ? "\\\\" : "/";
 
-        return path.toString().split(separator);
+        return Arrays.asList(path.toString().split(separator));
     }
 }
