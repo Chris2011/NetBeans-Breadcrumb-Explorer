@@ -135,7 +135,7 @@ public class BreadcrumbExplorerComponent extends JPanel implements PreferenceCha
 
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    pathLabel.setBackground(Color.LIGHT_GRAY); // Change the label's background color on mouse hover.
+                    pathLabel.setBackground(UIManager.getColor("MenuBar.hoverBackground")); // Change the label's background color on mouse hover.
                 }
 
                 @Override
@@ -216,7 +216,7 @@ public class BreadcrumbExplorerComponent extends JPanel implements PreferenceCha
             popupMenuPathLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    popupMenuPathLabel.setBackground(Color.LIGHT_GRAY); // Highlight on hover
+                    popupMenuPathLabel.setBackground(UIManager.getColor("MenuBar.hoverBackground")); // Change the label's background color on mouse hover.
                 }
 
                 @Override
