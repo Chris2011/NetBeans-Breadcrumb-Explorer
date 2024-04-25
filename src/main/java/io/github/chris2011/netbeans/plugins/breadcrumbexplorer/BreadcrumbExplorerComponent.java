@@ -1,10 +1,11 @@
 package io.github.chris2011.netbeans.plugins.breadcrumbexplorer;
 
+import io.github.chris2011.netbeans.plugins.breadcrumbexplorer.utils.BreadcrumbExplorerManager;
+import io.github.chris2011.netbeans.plugins.breadcrumbexplorer.utils.BreadcrumbExplorerObserver;
 import io.github.chris2011.netbeans.plugins.breadcrumbexplorer.utils.FileScanner;
 import io.github.chris2011.netbeans.plugins.breadcrumbexplorer.utils.PathUtils;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 import java.util.prefs.Preferences;
+import java.util.stream.IntStream;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -49,49 +51,77 @@ import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.util.Exceptions;
+import org.openide.util.NbPreferences;
 import org.openide.util.WeakListeners;
 
-public class BreadcrumbExplorerComponent extends JPanel implements PreferenceChangeListener {
+public class BreadcrumbExplorerComponent extends JPanel implements PreferenceChangeListener, BreadcrumbExplorerObserver {
 
     private final List<CustomPopup> openPopups;
+    private boolean showAllIcons = false;
+    private final Map<JLabel, String> labelPathMap = new LinkedHashMap<>();
 
     public BreadcrumbExplorerComponent(Document forDocument) {
         super(new BorderLayout());
+
+        initUI(forDocument);
+        BreadcrumbExplorerManager.addObserver(this);
+        applyInitialPreferences();
+
         this.openPopups = new ArrayList<>();
+
         {
             Preferences prefs = MimeLookup.getLookup(MimePath.EMPTY).lookup(Preferences.class);
             prefs.addPreferenceChangeListener(WeakListeners.create(PreferenceChangeListener.class, this, prefs));
         }
+    }
 
+    @Override
+    public void preferenceChange(PreferenceChangeEvent evt) {
+        setVisible(BreadcrumbExplorerComponent.isBreadcrumbExplorerVisible());
+
+        if (evt != null && "showIconsMacFinderLike".equals(evt.getKey())) {
+            showAllIcons = NbPreferences.forModule(BreadcrumbExplorerManager.class).getBoolean("showIconsMacFinderLike", BreadcrumbExplorerManager.getOptionState());
+            updateIconVisibility();
+        }
+    }
+
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+
+        BreadcrumbExplorerManager.removeObserver(this);
+    }
+
+    private void initUI(Document forDocument) {
         JPanel pathPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-        JScrollPane scrollPane = new JScrollPane(pathPanel);
-
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        JScrollPane scrollPane = new JScrollPane(pathPanel, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setBorder(null);
         scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 0));
 
         FileObject focusedFileObject = NbEditorUtilities.getFileObject(forDocument);
-
         if (focusedFileObject != null) {
             createPathStructure(pathPanel, focusedFileObject);
         }
 
         add(scrollPane, BorderLayout.CENTER);
-
         JButton closeButton = CloseButtonFactory.createBigCloseButton();
         add(closeButton, BorderLayout.EAST);
+        closeButton.addActionListener(e -> closeExplorer());
 
-        closeButton.addActionListener(e -> {
-            Preferences prefs = MimeLookup.getLookup(MimePath.EMPTY).lookup(Preferences.class);
-            prefs.putBoolean(BreadcrumbExplorerSideBarFactory.KEY_BREADCRUMB_EXPLORER, false);
+        addGlobalMouseListener();
+    }
 
-            preferenceChange(null);
-        });
+    private void applyInitialPreferences() {
+        showAllIcons = NbPreferences.forModule(BreadcrumbExplorerManager.class).getBoolean("showIconsMacFinderLike", BreadcrumbExplorerManager.getOptionState());
+        updateIconVisibility();
+    }
+
+    private void closeExplorer() {
+        Preferences prefs = MimeLookup.getLookup(MimePath.EMPTY).lookup(Preferences.class);
+        prefs.putBoolean(BreadcrumbExplorerSideBarFactory.KEY_BREADCRUMB_EXPLORER, false);
 
         preferenceChange(null);
-        addGlobalMouseListener();
+
     }
 
     /**
@@ -105,54 +135,62 @@ public class BreadcrumbExplorerComponent extends JPanel implements PreferenceCha
      * @param focusedFileObject The file object whose path is to be displayed.
      */
     private void createPathStructure(JPanel pathPanel, FileObject focusedFileObject) {
-        // Split the path of the focused file object into segments.
         List<String> splitPath = PathUtils.splitPath(PathUtils.getRelativeProjectPath(focusedFileObject));
         List<String> absoluteFolderPath = PathUtils.getAbsoluteFolderPath(splitPath, focusedFileObject);
 
-        // Iterate over each segment of the path.
-        for (int i = 0; i < splitPath.size(); i++) {
-            String name = splitPath.get(i); // Get the name of the current path segment.
-
-            // Retrieve the folders and files within the current path segment.
-            LinkedHashMap<String, String> scannedFolders = FileScanner.getScannedElements(absoluteFolderPath.get(absoluteFolderPath.size() == 1 ? 0 : i));
-
-            // Create a label for the current path segment.
+        IntStream.range(0, splitPath.size()).forEach(i -> {
+            String name = splitPath.get(i);
             JLabel pathLabel = createPathLabel(name);
 
-            // Set the icon for the label based on the file object's path.
-            pathLabel.setIcon(FileScanner.getIconForFileObject(absoluteFolderPath.get(absoluteFolderPath.size() == 1 ? 0 : i)));
+            LinkedHashMap<String, String> scannedFolders = FileScanner.getScannedElements(absoluteFolderPath.get(absoluteFolderPath.size() == 1 ? 0 : i));
 
-            // Add a mouse listener to handle clicks on the label.
-            pathLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    closeAllPopups(); // Close any open popups before opening a new one.
-                    CustomPopup popupMenu = createCustomPopupMenu(scannedFolders, null); // Create a new popup menu for the current segment.
-
-                    // Show the popup menu just below the clicked label.
-                    popupMenu.showPopup(pathLabel, pathLabel.getLocationOnScreen().x, pathLabel.getLocationOnScreen().y + pathLabel.getHeight());
-                }
-
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    pathLabel.setBackground(UIManager.getColor("MenuBar.hoverBackground")); // Change the label's background color on mouse hover.
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    pathLabel.setBackground(UIManager.getColor(pathPanel)); // Revert the label's background color when the mouse exits.
-                }
-            });
-
-            // Add the label to the path panel.
+            pathLabel.setIcon(FileScanner.getIconForFileObject(absoluteFolderPath.get(i)));
+            labelPathMap.put(pathLabel, absoluteFolderPath.get(i));
+            pathLabel.addMouseListener(new LabelMouseAdapter(scannedFolders, pathLabel));
             pathPanel.add(pathLabel);
 
-            // If this is not the last segment, add a '>' separator label.
             if (i < splitPath.size() - 1) {
-                JLabel separatorLabel = new JLabel(" > ");
-                separatorLabel.setFont(separatorLabel.getFont().deriveFont(Font.BOLD)); // Make the separator bold.
+                JLabel separatorLabel = createSeparatorLabel();
                 pathPanel.add(separatorLabel);
             }
+        });
+
+        updateIconVisibility();
+    }
+
+    private JLabel createSeparatorLabel() {
+        JLabel separatorLabel = new JLabel(" > ");
+        separatorLabel.setFont(separatorLabel.getFont().deriveFont(Font.BOLD));
+        return separatorLabel;
+    }
+
+    private class LabelMouseAdapter extends MouseAdapter {
+
+        private final LinkedHashMap<String, String> _scannedFolders;
+        private final JLabel _pathLabel;
+
+        public LabelMouseAdapter(LinkedHashMap<String, String> scannedFolders, JLabel pathLabel) {
+            _scannedFolders = scannedFolders;
+            _pathLabel = pathLabel;
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            closeAllPopups(); // Close any open popups before opening a new one.
+            CustomPopup popupMenu = createCustomPopupMenu(_scannedFolders, null); // Create a new popup menu for the current segment.
+
+            // Show the popup menu just below the clicked label.
+            popupMenu.showPopup(_pathLabel, _pathLabel.getLocationOnScreen().x, _pathLabel.getLocationOnScreen().y + _pathLabel.getHeight());
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            _pathLabel.setBackground(UIManager.getColor("MenuBar.hoverBackground")); // Change the label's background color on mouse hover.
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            _pathLabel.setBackground(UIManager.getColor("Panel.background")); // Revert the label's background color when the mouse exits.
         }
     }
 
@@ -338,9 +376,30 @@ public class BreadcrumbExplorerComponent extends JPanel implements PreferenceCha
         return label;
     }
 
+    /**
+     * Updates the visibility of icons in the path labels based on user
+     * preferences. Shows icons on all labels if the preference is enabled,
+     * otherwise, shows icons only on the first and last labels.
+     *
+     * @param showIcons Specifies whether to show icons on all labels (true) or
+     * only on the first and last labels (false).
+     */
     @Override
-    public void preferenceChange(PreferenceChangeEvent evt) {
-        setVisible(BreadcrumbExplorerComponent.isBreadcrumbExplorerVisible());
+    public void updateIconVisibility() {
+        showAllIcons = NbPreferences.forModule(BreadcrumbExplorerManager.class)
+            .getBoolean("showIconsMacFinderLike", BreadcrumbExplorerManager.getOptionState());
+
+        List<JLabel> labels = new ArrayList<>(labelPathMap.keySet());
+        JLabel firstLabel = labels.isEmpty() ? null : labels.get(0);
+        JLabel lastLabel = labels.isEmpty() ? null : labels.get(labels.size() - 1);
+
+        labels.forEach(label -> {
+            boolean shouldShowIcon = showAllIcons || label == firstLabel || label == lastLabel;
+            label.setIcon(shouldShowIcon ? FileScanner.getIconForFileObject(labelPathMap.get(label)) : null);
+        });
+
+        revalidate();
+        repaint();
     }
 
     private void openFileInEditor(String filePath) {
