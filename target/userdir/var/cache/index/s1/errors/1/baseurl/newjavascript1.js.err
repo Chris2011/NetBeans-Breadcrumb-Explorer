@@ -1,15 +1,0 @@
-ERROR:3:Expected jsx_identifier but found >\n              <> \n               ^
-ERROR:4:Expected an operand but found <\n      <div>\n      ^
-ERROR:5:Expected an operand but found <\n      <Link to="/"><button>Home</button></Lin
-ERROR:6:Expected an operand but found <\n      <br /><br />\n      ^
-ERROR:7:Expected an operand but found <\n      </div>\n      ^
-ERROR:9:Expected an operand but found <\n      <div>\n      ^
-ERROR:10:Expected an operand but found <\n      <Link to="/blogs"><button>Blogs</butto
-ERROR:11:Expected an operand but found <\n      <br /><br />\n      ^
-ERROR:12:Expected an operand but found <\n      </div>  \n      ^
-ERROR:14:Expected an operand but found <\n      <div>\n      ^
-ERROR:15:Expected an operand but found <\n      <Link to="/contact"><button>Contact fo
-ERROR:16:Expected an operand but found <\n      </div>            \n      ^
-ERROR:19:Expected an operand but found <\n  <Outlet />\n  ^
-ERROR:20:Expected an operand but found <\n</>\n^
-ERROR:21:Expected ; but found )\n      )\n      ^
