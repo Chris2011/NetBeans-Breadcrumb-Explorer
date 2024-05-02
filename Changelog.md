@@ -1,5 +1,10 @@
 # Changelog
 
+## Update in 1.3.0
+
+### Features
+1 - [#6](https://github.com/Chris2011/netbeans-breadcrumb-explorer/issues/6): Add the copy path button relative to the root folder of the project.  
+
 ## Update in 1.2.0
 
 ### Features
