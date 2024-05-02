@@ -24,7 +24,8 @@ public class PathUtils {
             return fileObject.getPath();
         }
 
-        return fileObject.getPath().substring((project.getProjectDirectory().getParent().getPath() + File.separator).length());
+        return fileObject.getPath()
+            .substring((project.getProjectDirectory().getParent().getPath() + File.separator).length());
     }
 
     public static List<String> getAbsoluteFolderPath(List<String> nameList, FileObject fileObject) {
@@ -45,6 +46,16 @@ public class PathUtils {
         }
 
         return folders;
+    }
+
+    public static String getRelativeFolderPath(String absolutePath, FileObject fileObject) {
+        Project project = FileOwnerQuery.getOwner(fileObject);
+
+        if (project == null) {
+            return fileObject.getPath();
+        }
+
+        return File.separator + absolutePath.substring((project.getProjectDirectory().getPath()).length());
     }
 
     public static List<String> splitPath(String pathString) {
