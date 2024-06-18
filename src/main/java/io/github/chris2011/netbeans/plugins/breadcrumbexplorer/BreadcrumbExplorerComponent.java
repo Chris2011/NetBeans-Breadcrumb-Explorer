@@ -97,7 +97,7 @@ public class BreadcrumbExplorerComponent extends JPanel
     }
 
     private void initUI(Document forDocument) {
-        JPanel pathPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel pathPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         JScrollPane scrollPane = new JScrollPane(pathPanel, JScrollPane.VERTICAL_SCROLLBAR_NEVER,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setBorder(null);
@@ -151,22 +151,28 @@ public class BreadcrumbExplorerComponent extends JPanel
             LinkedHashMap<String, String> scannedFolders = FileScanner
                 .getScannedElements(absoluteFolderPath.get(index));
 
-            JLabel pathLabel = createPathLabel(name);
+            List<String> paths = new ArrayList<>(2);
+            paths.add(Utilities.isWindows() ? absoluteFolderPath.get(index).replace("/", "\\")
+                : absoluteFolderPath.get(index));
+            paths.add(PathUtils.getRelativeFolderPath(absoluteFolderPath.get(index), focusedFileObject)
+                .replace("\\", "/").replace("//", "/"));
 
-            pathLabel.setIcon(FileScanner.getIconForFileObject(absoluteFolderPath.get(index)));
-            labelPathMap.put(pathLabel, absoluteFolderPath.get(index));
-            pathLabel.addMouseListener(new LabelMouseAdapter(scannedFolders, pathLabel));
+            JLabel label = null;
 
-            pathPanel.add(pathLabel);
+            if (i == splitPath.size() - 1) {
+                label = createActionsLabel(createPathLabel(name), paths);
+            } else {
+                label = createPathLabel(name);
+                label.addMouseListener(new LabelMouseAdapter(scannedFolders, label));
+            }
+
+            label.setIcon(FileScanner.getIconForFileObject(absoluteFolderPath.get(index)));
+            labelPathMap.put(label, absoluteFolderPath.get(index));
+
+            pathPanel.add(label);
 
             if (i < splitPath.size() - 1) {
-                List<String> paths = new ArrayList<>(2);
-                paths.add(Utilities.isWindows() ? absoluteFolderPath.get(index).replace("/", "\\")
-                    : absoluteFolderPath.get(index));
-                paths.add(PathUtils.getRelativeFolderPath(absoluteFolderPath.get(index), focusedFileObject)
-                    .replace("\\", "/").replace("//", "/"));
-
-                JLabel separatorLabel = createSeparatorLabel(paths);
+                JLabel separatorLabel = createActionsLabel(createPathLabel(" > "), paths);
                 pathPanel.add(separatorLabel);
             }
         });
@@ -174,7 +180,7 @@ public class BreadcrumbExplorerComponent extends JPanel
         updateIconVisibility();
     }
 
-    private JLabel createSeparatorLabel(List<String> paths) {
+    private JLabel createActionsLabel(JLabel label, List<String> paths) {
         String absolutePath = paths.get(0);
         String relativePath = paths.get(1);
 
@@ -184,13 +190,11 @@ public class BreadcrumbExplorerComponent extends JPanel
         actions.put("Open containing folder", ()
             -> openContainingFolder(absolutePath));
 
-        JLabel separatorLabel = createPathLabel(" > ");
-
-        separatorLabel.setFont(separatorLabel.getFont().deriveFont(Font.BOLD));
-        separatorLabel.addMouseListener(new MouseAdapter() {
+        label.setFont(label.getFont().deriveFont(Font.BOLD));
+        label.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                CustomPopup popup = new CustomPopup(SwingUtilities.getWindowAncestor(separatorLabel));
+                CustomPopup popup = new CustomPopup(SwingUtilities.getWindowAncestor(label));
                 openPopups.add(popup);
                 addGlobalKeyListener(popup);
 
@@ -215,8 +219,8 @@ public class BreadcrumbExplorerComponent extends JPanel
                     popup.addItem(panel);
                 }
 
-                Point locOnScreen = separatorLabel.getLocationOnScreen();
-                popup.showPopup(separatorLabel, locOnScreen.x, locOnScreen.y + separatorLabel.getHeight());
+                Point locOnScreen = label.getLocationOnScreen();
+                popup.showPopup(label, locOnScreen.x, locOnScreen.y + label.getHeight());
 
                 popup.pack();
 
@@ -232,16 +236,16 @@ public class BreadcrumbExplorerComponent extends JPanel
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                separatorLabel.setBackground(UIManager.getColor("MenuBar.hoverBackground"));
+                label.setBackground(UIManager.getColor("MenuBar.hoverBackground"));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                separatorLabel.setBackground(UIManager.getColor("Panel.background"));
+                label.setBackground(UIManager.getColor("Panel.background"));
             }
         });
 
-        return separatorLabel;
+        return label;
     }
 
     private void copyPath(String path) {
@@ -250,7 +254,15 @@ public class BreadcrumbExplorerComponent extends JPanel
 
     private void openContainingFolder(String absolutePath) {
         try {
-            Desktop.getDesktop().open(new File(absolutePath));
+            File file = new File(absolutePath);
+
+            if (!file.exists()) {
+                openContainingFolder(file.getParentFile().getAbsolutePath());
+
+                return;
+            }
+
+            Desktop.getDesktop().open(file.isDirectory() ? file : file.getParentFile());
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -269,9 +281,8 @@ public class BreadcrumbExplorerComponent extends JPanel
         @Override
         public void mouseClicked(MouseEvent e) {
             closeAllPopups();
-            
-            // TODO: Add notification for copy absolute path and relative path to get user feedback
 
+            // TODO: Add notification for copy absolute path and relative path to get user feedback
             actions.get(label.getText()).run();
         }
 
@@ -498,7 +509,7 @@ public class BreadcrumbExplorerComponent extends JPanel
     private JLabel createPathLabel(String labelName) {
         JLabel label = new JLabel(labelName);
 
-        label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        label.setBorder(BorderFactory.createEmptyBorder(7, 10, 7, 10));
         label.setOpaque(true);
 
         return label;

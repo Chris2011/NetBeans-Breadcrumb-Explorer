@@ -32,13 +32,23 @@ public class PathUtils {
         Project project = FileOwnerQuery.getOwner(fileObject);
         List<String> folders = new ArrayList<>();
 
+        StringBuilder absolutePath = new StringBuilder("");
+
         if (project == null) {
-            folders.add(fileObject.getPath());
+            for (int i = 0; i < nameList.size(); i++) {
+                absolutePath.append(nameList.get(i));
+
+                if (i < nameList.size() - 1) {
+                    absolutePath.append(File.separator);
+                }
+
+                folders.add(absolutePath.toString());
+            }
 
             return folders;
         }
 
-        StringBuilder absolutePath = new StringBuilder(project.getProjectDirectory().getParent().getPath());
+        absolutePath = new StringBuilder(project.getProjectDirectory().getParent().getPath());
 
         for (String folder : nameList) {
             absolutePath.append(File.separator).append(folder);
@@ -52,7 +62,17 @@ public class PathUtils {
         Project project = FileOwnerQuery.getOwner(fileObject);
 
         if (project == null) {
-            return fileObject.getPath();
+            // Remove the drive letter if present (Windows)
+            if (absolutePath.length() > 2 && absolutePath.charAt(1) == ':') {
+                absolutePath = absolutePath.substring(2);
+            }
+
+            // Ensure the path starts with a single '/'
+            if (!absolutePath.startsWith("/")) {
+                absolutePath = "/" + absolutePath;
+            }
+
+            return absolutePath;
         }
 
         return File.separator + absolutePath.substring((project.getProjectDirectory().getPath()).length());

@@ -1,5 +1,11 @@
 # Changelog
 
+## Update in 1.4.0
+
+### Features
+1 - [#9](https://github.com/Chris2011/NetBeans-Breadcrumb-Explorer/issues/9): Add new context menu for filename for the same actions as for folders.  
+2 - [#12](https://github.com/Chris2011/NetBeans-Breadcrumb-Explorer/issues/12): Please remove the indentations.  
+
 ## Update in 1.3.0
 
 ### Features
