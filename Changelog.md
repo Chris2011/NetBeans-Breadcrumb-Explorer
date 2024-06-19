@@ -1,5 +1,10 @@
 # Changelog
 
+## Update in 1.5.0
+
+### Features
+1 - [#16](https://github.com/Chris2011/NetBeans-Breadcrumb-Explorer/issues/16): Reduce the horizontal indentation.  
+
 ## Update in 1.4.0
 
 ### Features
