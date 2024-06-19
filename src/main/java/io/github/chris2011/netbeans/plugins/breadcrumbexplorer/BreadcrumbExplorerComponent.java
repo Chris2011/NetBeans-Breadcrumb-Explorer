@@ -34,7 +34,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -49,7 +48,6 @@ import org.netbeans.api.editor.mimelookup.MimeLookup;
 import org.netbeans.api.editor.mimelookup.MimePath;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.openide.awt.CloseButtonFactory;
-import org.openide.awt.Notification;
 import org.openide.awt.NotificationDisplayer;
 import org.openide.cookies.OpenCookie;
 import org.openide.filesystems.FileObject;
@@ -253,7 +251,7 @@ public class BreadcrumbExplorerComponent extends JPanel
 
     private void copyPath(String path) {
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(path), null);
-        
+
         NotificationDisplayer.getDefault().notify("Path copied", NotificationDisplayer.Priority.NORMAL.getIcon(), "Path copied successfully", null);
     }
 
@@ -514,7 +512,12 @@ public class BreadcrumbExplorerComponent extends JPanel
     private JLabel createPathLabel(String labelName) {
         JLabel label = new JLabel(labelName);
 
-        label.setBorder(BorderFactory.createEmptyBorder(7, 10, 7, 10));
+        if (labelName.equals(">")) {
+            label.setBorder(BorderFactory.createEmptyBorder(7, 8, 7, 8));
+        } else {
+            label.setBorder(BorderFactory.createEmptyBorder(7, 7, 7, 7));
+        }
+
         label.setOpaque(true);
 
         return label;
